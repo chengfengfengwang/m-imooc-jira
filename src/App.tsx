@@ -1,4 +1,4 @@
-import Index from './screens/index.jsx'
+import Index from './screens/index'
 
 function App() {
   return (

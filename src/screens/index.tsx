@@ -1,19 +1,34 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as qs from "qs";
-import {cleanObject} from '../utils.js'
+import {cleanObject, useDebounce} from '../utils'
+
+interface param {
+  name: string,
+  personId: string
+}
+interface project {
+  id: number,
+  name: string
+}
+interface searchParam {
+  param: param,
+  setParam: (param: searchParam['param']) => void
+}
+
 export default function Index() {
   const [param, setParam] = useState({
     name: '',
     personId: ''
   });
   const [list, setList] = useState([]);
+  const debounceParam = useDebounce(param, 2000)
   useEffect(() => {
-    fetch(`http://localhost:4001/projects?${qs.stringify(cleanObject(param))}`).then(async (res) => {
+    fetch(`http://localhost:4001/projects?${qs.stringify(cleanObject(debounceParam))}`).then(async (res) => {
       if (res.ok) {
         setList(await res.json())
       }
     })
-  }, [param])
+  }, [debounceParam])
   return (
     <div>
       <Search param={param} setParam={setParam}></Search>
@@ -21,18 +36,18 @@ export default function Index() {
     </div>
   );
 }
-const Search = ({param, setParam}) => {
-  const inputChange = (e) => {
-    setParam({...param, name: e.target.value});
+const Search = ({param, setParam}: searchParam) => {
+  const inputChange = (e: React.FormEvent<HTMLInputElement>) => {
+    setParam({...param, name: e.currentTarget.value});
   };
-  const selectChange = (e) => {
-    setParam({...param, personId: e.target.value});
+  const selectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setParam({...param, personId: e.currentTarget.value});
   };
   return (
     <div>
-      <input onChange={inputChange} />
+      <input value={param.name} onChange={inputChange} />
       <select onChange={selectChange} name="cars" id="cars">
-        <option value="">负责人</option>
+        <option value={param.personId}>负责人</option>
         <option value="volvo">Volvo</option>
         <option value="saab">Saab</option>
         <option value="opel">Opel</option>
@@ -41,8 +56,7 @@ const Search = ({param, setParam}) => {
     </div>
   );
 };
-const Table = (props) => {
-  const { list } = props;
+const Table = ({list}:{list: project[]}) => {
   return (
     <div>
       <table>
