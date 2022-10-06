@@ -1,43 +1,19 @@
 import { useEffect, useState } from "react";
-
+import * as qs from "qs";
+import {cleanObject} from '../utils.js'
 export default function Index() {
   const [param, setParam] = useState({
     name: '',
     personId: ''
   });
-  const [list, setList] = useState([
-    {
-      id: 1,
-      name: "骑手管理",
-      personId: 1,
-      organization: "外卖组",
-      created: 1604989757139,
-    },
-  ]);
-  // const onParamChange = (type, value) => {
-  //   console.log(type, value);
-  //   setList([
-  //     {
-  //       id: 1,
-  //       name: "骑手管理a",
-  //       personId: 1,
-  //       organization: "外卖组",
-  //       created: 1604989757139,
-  //     },
-  //   ]);
-  // };
+  const [list, setList] = useState([]);
   useEffect(() => {
-    console.log('zzz123');
-    // setList([
-    //   {
-    //     id: 1,
-    //     name: "骑手管理a",
-    //     personId: 1,
-    //     organization: "外卖组",
-    //     created: 1604989757139,
-    //   },
-    // ]);
-  }, [])
+    fetch(`http://localhost:4001/projects?${qs.stringify(cleanObject(param))}`).then(async (res) => {
+      if (res.ok) {
+        setList(await res.json())
+      }
+    })
+  }, [param])
   return (
     <div>
       <Search param={param} setParam={setParam}></Search>
@@ -47,17 +23,16 @@ export default function Index() {
 }
 const Search = ({param, setParam}) => {
   const inputChange = (e) => {
-    console.log('11');
     setParam({...param, name: e.target.value});
   };
   const selectChange = (e) => {
-    console.log('22');
     setParam({...param, personId: e.target.value});
   };
   return (
     <div>
       <input onChange={inputChange} />
       <select onChange={selectChange} name="cars" id="cars">
+        <option value="">负责人</option>
         <option value="volvo">Volvo</option>
         <option value="saab">Saab</option>
         <option value="opel">Opel</option>
